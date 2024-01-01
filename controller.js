@@ -131,6 +131,7 @@ export default {
             next(err);
         }
     },
+    // API with no using token
     getUserDetails: async (req, res, next) => {
         try {
             // const data = verifyToken(req.headers.access_token);
