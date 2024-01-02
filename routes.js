@@ -80,7 +80,7 @@ routes.post(
 );
 
 // Get the user data by providing the access token
-routes.get('/profile', controller.getUser);
+routes.get('/profile', tokenValidation(), validate, controller.getUser);
 
 // Get new access and refresh token by providing the refresh token
 routes.get(
@@ -126,6 +126,7 @@ routes.post(
 
     ],
     validate,
+    tokenValidation(true),
     controller.createDetails
 );
 

@@ -114,6 +114,7 @@ export default {
         try {
             // Verify the access token
             const data = verifyToken(req.headers.access_token);
+            console.log(data)
             if (data?.status) return res.status(data.status).json(data);
 
             const user = await fetchUserByEmailOrID(data.id, false);
@@ -149,7 +150,6 @@ export default {
                 count: count[0].count,
                 userData: userData
             })
-
         }
         catch (err) {
             next(err);
