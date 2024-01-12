@@ -113,7 +113,14 @@ export default {
     getUser: async (req, res, next) => {
         try {
             // Verify the access token
-            const data = verifyToken(req.headers.access_token);
+            const accessToken = req.headers.access_token;
+            if (!accessToken || typeof accessToken !== 'string' || accessToken.trim() === '') {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Invalid access token provided',
+                });
+            }
+            const data = verifyToken(accessToken);
             console.log(data)
             if (data?.status) return res.status(data.status).json(data);
 
@@ -138,7 +145,6 @@ export default {
             // const data = verifyToken(req.headers.access_token);
             // if (data?.status) return res.status(data.status).json(data);
             const userData = await fetchAllUserData();
-            console.log('hi', userData)
             const count = await getCount()
             if (userData.length === 0) {
                 return res.status(404).json({
@@ -209,13 +215,18 @@ export default {
         }
     },
 
-    createUserDetails: async () => {
+    createUserDetails: async (req, res, next) => {
         try {
-            console.log('calling')
-
-            const data = verifyToken(req.headers.access_token);
-            console.log('calling', data)
-
+            const accessToken = req.headers.access_token;
+            // Check if accessToken exists and is a non-empty string
+            // if (!accessToken || typeof accessToken !== 'string' || accessToken.trim() === '') {
+            //     return res.status(400).json({
+            //         status: 400,
+            //         message: 'Invalid access token provided',
+            //     });
+            // }
+            console.log('checking token', accessToken)
+            const data = verifyToken(accessToken);
             if (data?.status) return res.status(data.status).json(data);
             const userData = await createUserData(data.id)
             console.log('createData', userData)
@@ -225,99 +236,101 @@ export default {
                     message: 'Enter user details failed'
                 })
             }
-            res.json({
-                status: 200,
-                message: 'Data successfully added'
-            })
+            res.status(201).json({
+                            ok: 1,
+                            status: 201,
+                            message: 'Post has been created Successfully',
+                            post_id: result.insertId,
+                        })
         }
         catch (err) {
             err.Error
         }
     },
 
-    createDetails: async (req, res, next) => {
-        const {
-            userId,
-            firstName,
-            lastName,
-            religion,
-            gender,
-            ethnics,
-            civilState,
-            height,
-            profession,
-            city,
-            country,
-            district,
-            fEthnics,
-            fCaste,
-            fReligion,
-            fProfession,
-            fCountry,
-            mEthnics,
-            mCaste,
-            mReligion,
-            mProfession,
-            birthday,
-            birthCountry,
-            birthCity,
-            birthTime,
-            phoneNumber,
-            email,
-            createdAt,
-            id
-        } = matchedData(req);
-        try {
-            const data = verifyToken(req.headers.access_token);
-            console.log('createDara', data)
+    // createDetails: async (req, res, next) => {
+    //     const {
+    //         userId,
+    //         firstName,
+    //         lastName,
+    //         religion,
+    //         gender,
+    //         ethnics,
+    //         civilState,
+    //         height,
+    //         profession,
+    //         city,
+    //         country,
+    //         district,
+    //         fEthnics,
+    //         fCaste,
+    //         fReligion,
+    //         fProfession,
+    //         fCountry,
+    //         mEthnics,
+    //         mCaste,
+    //         mReligion,
+    //         mProfession,
+    //         birthday,
+    //         birthCountry,
+    //         birthCity,
+    //         birthTime,
+    //         phoneNumber,
+    //         email,
+    //         createdAt,
+    //         id
+    //     } = matchedData(req);
+    //     try {
+    //         const data = verifyToken(req.headers.access_token);
+    //         console.log('createDara', data)
             
-            const [result] = await DB.execute(
-                `INSERT INTO 
-                users_data(userId, firstName, lastName, religion, gender, ethnics, civilState, height, profession, city, country, district, fEthnics, fCaste, fReligion, fProfession, fCountry, mEthnics, mCaste, mReligion, mProfession, birthday, birthCountry, birthCity, birthTime, phoneNumber, email, createdAt, id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    userId,
-                    firstName,
-                    lastName,
-                    religion,
-                    gender,
-                    ethnics,
-                    civilState,
-                    height,
-                    profession,
-                    city,
-                    country,
-                    district,
-                    fEthnics,
-                    fCaste,
-                    fReligion,
-                    fProfession,
-                    fCountry,
-                    mEthnics,
-                    mCaste,
-                    mReligion,
-                    mProfession,
-                    birthday,
-                    birthCountry,
-                    birthCity,
-                    birthTime,
-                    phoneNumber,
-                    email,
-                    createdAt,
-                    id
-                ]
-            );
-            res.status(201).json({
-                ok: 1,
-                status: 201,
-                message: 'Post has been created Successfully',
-                post_id: result.insertId,
-            })
-        }
-        catch (e) {
-            next(e);
-        }
-    },
+    //         const [result] = await DB.execute(
+    //             `INSERT INTO 
+    //             users_data(userId, firstName, lastName, religion, gender, ethnics, civilState, height, profession, city, country, district, fEthnics, fCaste, fReligion, fProfession, fCountry, mEthnics, mCaste, mReligion, mProfession, birthday, birthCountry, birthCity, birthTime, phoneNumber, email, createdAt, id)
+    //             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    //             [
+    //                 userId,
+    //                 firstName,
+    //                 lastName,
+    //                 religion,
+    //                 gender,
+    //                 ethnics,
+    //                 civilState,
+    //                 height,
+    //                 profession,
+    //                 city,
+    //                 country,
+    //                 district,
+    //                 fEthnics,
+    //                 fCaste,
+    //                 fReligion,
+    //                 fProfession,
+    //                 fCountry,
+    //                 mEthnics,
+    //                 mCaste,
+    //                 mReligion,
+    //                 mProfession,
+    //                 birthday,
+    //                 birthCountry,
+    //                 birthCity,
+    //                 birthTime,
+    //                 phoneNumber,
+    //                 email,
+    //                 createdAt,
+    //                 id
+    //             ]
+    //         );
+    //         res.status(201).json({
+    //             ok: 1,
+    //             status: 201,
+    //             message: 'Post has been created Successfully',
+    //             post_id: result.insertId,
+    //         })
+    //     }
+    //     catch (e) {
+    //         next(e);
+    //     }
+    // },
 
 
 

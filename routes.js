@@ -123,11 +123,11 @@ routes.post(
             body("email", "Email must not be empty.").trim().not().isEmpty().isEmail().escape(),
             body("createdAt", "Created at must not be empty.").trim().not().isEmpty().escape(),
             body("id", "Foreign Key must not be empty.").trim().not().isEmpty().escape()
-
+            
     ],
-    validate,
     tokenValidation(true),
-    controller.createDetails
+    validate,
+    controller.createUserDetails
 );
 
 export default routes;
