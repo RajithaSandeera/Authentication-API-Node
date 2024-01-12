@@ -38,12 +38,23 @@ export const getCount = async() => {
     return row;
 }
 export const createUserData = async (data) => {
-    let sql = `INSERT INTO 
-                users_data(userId, firstName, lastName, religion, gender, ethnics, civilState, height, profession, city, country, district, fEthnics, fCaste, fReligion, fProfession, fCountry, mEthnics, mCaste, mReligion, mProfession, birthday, birthCountry, birthCity, birthTime, phoneNumber, email, createdAt, id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const [row] = await DB.execute(sql, [data])
-    return row;
-}
+    const {
+        userId,firstName,lastName,religion,gender,ethnics,civilState,height,profession,city,country,district,fEthnics,fCaste,fReligion,fProfession,fCountry,mEthnics,mCaste,mReligion,mProfession,birthday,birthCountry,birthCity,birthTime,phoneNumber,email,createdAt,id
+    } = matchedData(data);
+    try {
+      let sql = `INSERT INTO 
+                  users_data(userId, firstName, lastName, religion, gender, ethnics, civilState, height, profession, city, country, district, fEthnics, fCaste, fReligion, fProfession, fCountry, mEthnics, mCaste, mReligion, mProfession, birthday, birthCountry, birthCity, birthTime, phoneNumber, email, createdAt, id)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const [row] = await DB.execute(sql,  [
+        userId,firstName,lastName,religion,gender,ethnics,civilState,height,profession,city,country,district,fEthnics,fCaste,fReligion,fProfession,fCountry,mEthnics,mCaste,mReligion,mProfession,birthday,birthCountry,birthCity,birthTime,phoneNumber,email,createdAt,id
+    ]);
+      return row;
+    } catch (error) {
+      console.error('Error in createUserData:', error);
+      throw error; // rethrow the error for handling in the calling function
+    }
+  };
+  
 
 export default {
     signup: async (req, res, next) => {
@@ -217,7 +228,7 @@ export default {
 
     createUserDetails: async (req, res, next) => {
         try {
-            const accessToken = req.headers.access_token;
+            const accessToken = req.headers.refresh_token;
             // Check if accessToken exists and is a non-empty string
             // if (!accessToken || typeof accessToken !== 'string' || accessToken.trim() === '') {
             //     return res.status(400).json({
@@ -228,60 +239,38 @@ export default {
             console.log('checking token', accessToken)
             const data = verifyToken(accessToken);
             if (data?.status) return res.status(data.status).json(data);
-            const userData = await createUserData(data.id)
-            console.log('createData', userData)
-            if (userData.length !== 1) {
-                return res.status(404).json({
-                    status: 404,
-                    message: 'Enter user details failed'
-                })
-            }
-            res.status(201).json({
-                            ok: 1,
-                            status: 201,
-                            message: 'Post has been created Successfully',
-                            post_id: result.insertId,
-                        })
-        }
-        catch (err) {
-            err.Error
-        }
-    },
+            console.log('working11')
+            const userData = await createUserData(req)
+            console.log('working',userData)
 
+           // Update the condition to check for userData
+    if (!userData) {
+        return res.status(404).json({
+          status: 404,
+          message: 'Enter user details failed',
+        });
+      }
+  
+      res.status(201).json({
+        ok: 1,
+        status: 201,
+        message: 'Post has been created Successfully',
+        post_id: userData.insertId, // Assuming insertId is the correct property
+      });
+    } catch (err) {
+      console.error('Error in createUserDetails:', err);
+      res.status(500).json({
+        status: 500,
+        message: 'Internal Server Error',
+      });
+    }
+  },
     // createDetails: async (req, res, next) => {
     //     const {
-    //         userId,
-    //         firstName,
-    //         lastName,
-    //         religion,
-    //         gender,
-    //         ethnics,
-    //         civilState,
-    //         height,
-    //         profession,
-    //         city,
-    //         country,
-    //         district,
-    //         fEthnics,
-    //         fCaste,
-    //         fReligion,
-    //         fProfession,
-    //         fCountry,
-    //         mEthnics,
-    //         mCaste,
-    //         mReligion,
-    //         mProfession,
-    //         birthday,
-    //         birthCountry,
-    //         birthCity,
-    //         birthTime,
-    //         phoneNumber,
-    //         email,
-    //         createdAt,
-    //         id
+    //         userId,firstName,lastName,religion,gender,ethnics,civilState,height,profession,city,country,district,fEthnics,fCaste,fReligion,fProfession,fCountry,mEthnics,mCaste,mReligion,mProfession,birthday,birthCountry,birthCity,birthTime,phoneNumber,email,createdAt,id
     //     } = matchedData(req);
     //     try {
-    //         const data = verifyToken(req.headers.access_token);
+    //         const data = verifyToken(req.headers.refresh_token);
     //         console.log('createDara', data)
             
     //         const [result] = await DB.execute(
@@ -289,35 +278,8 @@ export default {
     //             users_data(userId, firstName, lastName, religion, gender, ethnics, civilState, height, profession, city, country, district, fEthnics, fCaste, fReligion, fProfession, fCountry, mEthnics, mCaste, mReligion, mProfession, birthday, birthCountry, birthCity, birthTime, phoneNumber, email, createdAt, id)
     //             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     //             [
-    //                 userId,
-    //                 firstName,
-    //                 lastName,
-    //                 religion,
-    //                 gender,
-    //                 ethnics,
-    //                 civilState,
-    //                 height,
-    //                 profession,
-    //                 city,
-    //                 country,
-    //                 district,
-    //                 fEthnics,
-    //                 fCaste,
-    //                 fReligion,
-    //                 fProfession,
-    //                 fCountry,
-    //                 mEthnics,
-    //                 mCaste,
-    //                 mReligion,
-    //                 mProfession,
-    //                 birthday,
-    //                 birthCountry,
-    //                 birthCity,
-    //                 birthTime,
-    //                 phoneNumber,
-    //                 email,
-    //                 createdAt,
-    //                 id
+    //                 userId,firstName,lastName,religion,gender,ethnics,civilState,height,profession,city,country,district,fEthnics,fCaste,fReligion,fProfession,fCountry,mEthnics,mCaste,mReligion,mProfession,birthday,birthCountry,birthCity,birthTime,phoneNumber,email,createdAt,id
+
     //             ]
     //         );
     //         res.status(201).json({

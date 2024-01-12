@@ -21,7 +21,6 @@ export const verifyToken = (token, access = true) => {
         ? process.env.ACCESS_TOKEN_SECRET
         : process.env.REF_TOKEN_SECRET;
     try {
-        console.log('jwt', token)
         return jwt.verify(token, secret);
     } catch (err) {
         return {
